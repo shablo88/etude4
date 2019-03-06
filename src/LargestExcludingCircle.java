@@ -28,25 +28,20 @@ import java.util.List;
 
 public final class LargestExcludingCircle {
     private static List<String> inputs;
+    private static List<Point> points;
 
     public static void main(String[] args) {
         try {
             //reads the input file
             readFile();
             //assigns the input file to a list of points
-            List<Point> points = new ArrayList<>();
-            for (String line : inputs) {
-                if (!line.equals("Telephone sites")) {
-                    String[] s = line.split(" ");
-                    points.add(new Point(Double.parseDouble(s[0]), Double.parseDouble(s[1])));
-                }
-            }
 
             //makes the smallest enclosing circle possible
             Circle smallestEnclosing = makeCircle(points);
+            System.out.println(smallestEnclosing);
 
             //find the largest excluding circle
-            Circle largestExcluding = largest(smallestEnclosing, points, false, smallestEnclosing.shrink().grow());
+            Circle largestExcluding = largest(smallestEnclosing, false, smallestEnclosing.shrink().grow());
             //print a summary
             System.out.println(String.format("The largest circle that can drawn such that no more than eleven points are" +
                             " within its area is of radius %.2fm.\nThe ideal circle is centred on %.2fm north and %.2fm" +
@@ -69,7 +64,7 @@ public final class LargestExcludingCircle {
         }
     }
 
-    private static Circle largest(Circle old, List<Point> points, boolean grow, Circle original) {
+    private static Circle largest(Circle old, boolean grow, Circle original) {
         Circle newCircle;
 
         //boolean input determines whether to grow or shrink the circle
@@ -89,11 +84,11 @@ public final class LargestExcludingCircle {
         }
         //else if there are more than one points excluded, then see if you can enlarge the circle and still exclude at least one
         else if(j > 1) {
-            return largest(newCircle, points, true, original);
+            return largest(newCircle, true, original);
         }
         //if there are no points excluded, then shrink the circle
         else if(j == 0) {
-            return largest(newCircle,points, false, original);
+            return largest(newCircle, false, original);
         }
         //else the new circle is right
         else return newCircle;
@@ -104,6 +99,12 @@ public final class LargestExcludingCircle {
      */
     private static void readFile() throws IOException {
         inputs = Files.readAllLines(Paths.get("coords.txt"));
+        for (String line : inputs) {
+            if (!line.equals("Telephone sites")) {
+                String[] s = line.split(" ");
+                points.add(new Point(Double.parseDouble(s[0]), Double.parseDouble(s[1])));
+            }
+        }
     }
 
     /*
