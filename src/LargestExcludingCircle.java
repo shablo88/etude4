@@ -34,9 +34,10 @@ public final class LargestExcludingCircle {
             //find the largest excluding circle
             Circle largestExcluding = largest(smallestEnclosing, false, smallestEnclosing.shrink().grow());
             //print a summary
-            System.out.println(String.format("The largest circle that can be drawn such that no more than eleven points are" +
+            System.out.println(String.format("The largest circle that can be drawn such that no more than %d points are" +
                             " within its area is of radius %.2fm.\nThe ideal circle is centred on %.2fm north and %.2fm" +
-                            " east of the central point", largestExcluding.radius, largestExcluding.center.x, largestExcluding.center.y));
+                            " east of the central point", points.size()-1, largestExcluding.radius, largestExcluding.center.x,
+                    largestExcluding.center.y));
 
             /*
             //finds the excluded points
