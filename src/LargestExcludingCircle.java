@@ -34,10 +34,18 @@ public final class LargestExcludingCircle {
             //find the largest excluding circle
             Circle largestExcluding = largest(smallestEnclosing, false, smallestEnclosing.shrink().grow());
             //print a summary
-            System.out.println(String.format("The largest circle that can be drawn such that no more than %d points are" +
-                            " within its area is of radius %.2fm.\nThe ideal circle is centred on %.2fm north and %.2fm" +
-                            " east of the central point", points.size()-1, largestExcluding.radius, largestExcluding.center.x,
-                    largestExcluding.center.y));
+            if (largestExcluding.radius > 0) {
+                System.out.println(String.format("The largest circle that can be drawn such that no more than %d points are" +
+                                " within its area is of radius %.2fm.\nThe ideal circle is centred on %.2fm north and %.2fm" +
+                                " east of the central point", points.size() - 1, largestExcluding.radius, largestExcluding.center.x,
+                        largestExcluding.center.y));
+            } else if (largestExcluding.radius == 0) {
+                System.out.println(String.format("The largest circle that can be drawn such that no more than %d points are" +
+                                " within its area is of radius 0m.\nThis means that all except one phone are at the exact same location," +
+                        " or that the points are too close to each other to have a feasible maximum range", points.size() - 1));
+            } else {
+                System.out.println("There is no possible circle that excludes at least one point, as they are all at the same location!");
+            }
 
             /*
             //finds the excluded points
@@ -76,8 +84,8 @@ public final class LargestExcludingCircle {
         if(newCircle.radius == original.radius) {
             return newCircle.shrink();
         }
-        //else if there are more than one points excluded, then see if you can enlarge the circle and still exclude at least one
-        else if(i > 1) {
+        //else if there are less than eleven points included, then see if you can enlarge the circle and still include at most eleven
+        else if(i > points.size() - 11) {
             return largest(newCircle, true, original);
         }
         //if there are no points excluded, then shrink the circle
