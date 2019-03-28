@@ -14,8 +14,7 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 public final class LargestExcludingCircle {
@@ -34,17 +33,19 @@ public final class LargestExcludingCircle {
             //find the largest excluding circle
             Circle largestExcluding = largest(smallestEnclosing, false, smallestEnclosing.shrink().grow());
             //print a summary
-            if (largestExcluding.radius > 0) {
-                System.out.println(String.format("The largest circle that can be drawn such that no more than %d points are" +
-                                " within its area is of radius %.2fm.\nThe ideal circle is centred on %.2fm north and %.2fm" +
-                                " east of the central point", points.size() - 1, largestExcluding.radius, largestExcluding.center.x,
+            if(points.size() < 12) {
+                System.out.println("There is no upper limit on the range, as there are less than 12 points!");
+            } else if (largestExcluding.radius > 0) {
+                System.out.println(String.format("The largest circle that can be drawn such that no more than 11 points are" +
+                                " within its area is of radius %.2fm.\nThe ideal circle is centred on %.2fm east and %.2fm" +
+                                " north of the central point", largestExcluding.radius, largestExcluding.center.x,
                         largestExcluding.center.y));
             } else if (largestExcluding.radius == 0) {
-                System.out.println(String.format("The largest circle that can be drawn such that no more than %d points are" +
+                System.out.println("The largest circle that can be drawn such that no more than 11 points are" +
                                 " within its area is of radius 0m.\nThis means that all except one phone are at the exact same location," +
-                        " or that the points are too close to each other to have a feasible maximum range", points.size() - 1));
+                        " or that the points are too close to each other to have a feasible maximum range");
             } else {
-                System.out.println("There is no possible circle that excludes at least one point, as they are all at the same location!");
+                System.out.println("There is no possible circle that includes at most eleven points, as they are all at the same location!");
             }
 
             /*
@@ -73,10 +74,10 @@ public final class LargestExcludingCircle {
         if(grow) newCircle = old.grow();
         else newCircle = old.shrink();
 
-        //checks to see how many points are excluded
+        //checks to see how many points are included
         int i = 0;
         for(Point individual : points) {
-            if(newCircle.doesNotContain(individual)) {
+            if (!newCircle.doesNotContain(individual)) {
                 i++;
             }
         }
@@ -85,15 +86,13 @@ public final class LargestExcludingCircle {
             return newCircle.shrink();
         }
         //else if there are less than eleven points included, then see if you can enlarge the circle and still include at most eleven
-        else if(i > points.size() - 11) {
+        else if(i <= 11) {
             return largest(newCircle, true, original);
         }
         //if there are no points excluded, then shrink the circle
-        else if(i == 0) {
+        else {
             return largest(newCircle, false, original);
         }
-        //else the new circle is right
-        else return newCircle;
     }
 
     /*
@@ -108,7 +107,65 @@ public final class LargestExcludingCircle {
                 localPoints.add(new Point(Double.parseDouble(s[0]), Double.parseDouble(s[1])));
             }
         }
-        setPoints(localPoints);
+
+        //Find the 11 closest together points
+
+        cluster(localPoints);
+    }
+
+    private static void cluster(List<Point> localPoints) {
+        if(localPoints.size() < 12) {
+            setPoints(localPoints);
+            return;
+        }
+
+        List<Double> distances = new ArrayList<>();
+        List<Integer> cluster = new ArrayList<>();
+
+        for(Point i : localPoints) {
+            List<Double> distance = new ArrayList<>();
+            for(Point j : localPoints) {
+                distance.add(i.distance(j));
+            }
+            Collections.sort(distance);
+            distances.add(distance.get(11));
+        }
+
+        int closest = 0;
+        double size = distances.get(0);
+        for(int i = 0; i < distances.size(); i++) {
+            if(distances.get(i) < size) {
+                closest = i;
+                size = distances.get(i);
+            }
+        }
+
+        distances.clear();
+        for(Point k : localPoints) {
+            distances.add(localPoints.get(closest).distance(k));
+        }
+
+        for(int i = 0; i < 11; i++) {
+            cluster.add(-1);
+        }
+        for(int i = 0; i < distances.size(); i++) {
+            if (cluster.get(0) == -1) {
+                cluster.remove(0);
+                cluster.add(i);
+                Collections.sort(cluster);
+            } else if(distances.get(i) < distances.get(cluster.get(10))) {
+                cluster.remove(10);
+                cluster.add(i);
+                Collections.sort(cluster);
+            }
+        }
+
+        List<Point> pointCluster = new ArrayList<>();
+        pointCluster.add(localPoints.get(closest));
+        for(int i : cluster) {
+            pointCluster.add(localPoints.get(i));
+        }
+        setPoints(pointCluster);
     }
 
     /*
